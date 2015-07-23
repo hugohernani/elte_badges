@@ -1,0 +1,169 @@
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Canvabadges</title>
+          
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="description" content="">
+          <meta name="author" content="">
+      
+          <!-- Le styles -->
+          <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+          <link rel="stylesheet" href="/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+          <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+      
+          <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+          <!--[if lt IE 9]>
+            <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+          <![endif]-->
+      
+          <!-- Le fav and touch icons -->
+          <link rel="shortcut icon" href="/favicon.ico">
+          <style>
+          .progress-big, .progress-big .bar {
+            height: 40px;
+          }
+          .progress-big {
+            width: 300px;
+            position: relative;
+          }
+          .progress-big .tick {
+            z-index: 2;
+            width: 0px;
+            border: 1px solid #000;
+            height: 44px;
+            top: -2px;
+            position: absolute;
+          }
+          body {
+            padding-top: 40px;
+          }
+          h2.with_tall_image {
+            margin-top: -40px;
+          }
+          .earn_badge {
+            cursor: pointer;
+          }
+          .desc {
+            white-space: pre-line;
+            max-width: 700px;
+          }
+          input.credits {
+            margin-left: 10px;
+          }
+          .controls .module {
+            margin-bottom: 5px;
+          }
+          .verification {
+            margin-top: 10px;
+          }
+          .verification img {
+            max-height: 30px;
+            max-width: 100px;
+            vertical-align: middle;
+          }
+          #instructions {
+            margin-top: 20px;
+          }
+          #instructions li {
+            padding: 10px 0;
+          }
+          #user {
+            margin-top: 20px;
+          }
+          .footer {
+            margin-top: 50px;
+            font-style: italic;
+            color: #888;
+          }
+          .avatar {
+            max-height: 50px;
+            max-width: 50px;
+            float: left;
+            padding: 10px 10px 10px 0;
+            border: 0;
+          }
+          .selected_row td {
+            background: #ddd;
+          }
+          .badge_config {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+          }
+          .badge_config .thumbnail {
+            width: 90px;
+          }
+          .badge_config .extra {
+            font-size: 10px;
+            margin-top: -5px;
+            color: #888;
+            clear: left;
+            padding-top: 5px;
+            margin-left: 10px;
+          }
+          .badge_config .desc {
+            max-height: 55px;
+            overflow: hidden;
+            color: #444;
+          }
+          .badge_config .extra img {
+            max-height: 30px;
+            max-width: 100px;
+            vertical-align: middle;
+          }
+          .sub {
+            font-size: 12px;
+            padding-left: 5px;
+          }
+          .badge_earn_list {
+            list-style-type: none;
+            margin-top: 15px;
+            margin-bottom: 15px;
+          }
+          .cool_badge {
+            text-align: center;
+          }
+          .cool_badge .thumbnail {
+            height: 90px;
+            max-width: 90px;
+            display: inline;
+          }
+          </style>
+        </head>
+        <body data-path_prefix="<%= request.env['badges.path_prefix'] %>">
+          <div class="container" id="content">
+          <div id="contents">
+<%= yield %>
+          </div>
+          <footer class="footer">
+            <% issuer = BadgeHelper.issuer %>
+            powered by <a href="<%= issuer['url'] %>"><%= issuer['name'] %></a>
+            <% if @full_footer %>
+              | <a href="<%= request.env['badges.path_prefix'] %>/about">About</a>
+              | <a href="<%= request.env['badges.path_prefix'] %>/stats">Stats</a>
+            <% end %>
+          </footer>
+        </div>
+        <script src="/jquery.min.js"></script>
+        <script src="https://backpack.openbadges.org/issuer.js"></script>
+        <script src="/common.js"></script>
+        <script src="/badges.js?123"></script>
+        <script type="text/javascript" src="/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+        <% if @org && @org.settings && @org.settings['tracking_id'] %>
+          <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', '<%= @org.settings['tracking_id'] %>']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+              var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+              ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+              var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+
+          </script>
+        <% end %>
+      </body>
+      </html>

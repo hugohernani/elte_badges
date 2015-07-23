@@ -1,0 +1,164 @@
+<% settings = @badge_placement_config.merged_settings || {}
+   ref_code = settings['reference_code']
+   advanced = ref_code || settings['modules'] || settings['manual_approval']
+   disabled = false
+%>
+<% if !@badge_placement_config.configured? %>
+  <h3>This badge won't be available to students until it is saved.</h3>
+<% end %>
+  <form class='well form-horizontal' id="badge_settings" style="margin-top: 15px;" method="post" action="<%= request.env['badges.path_prefix'] %>/badges/settings/<%= @badge_placement_config_id %>">
+    <h2>Badge Settings</h2>
+    <img src="<%= settings['badge_url'] || '/badges/default.png' %>" style='float: left; margin-right: 10px; width: 90px; height: 90px;' class='thumbnail'/>
+    <fieldset>
+      <div class="control-group">
+        <label class="control-label" for="badge_name">Badge name: </label>
+        <div class="controls">
+          <input type="text" <%= "disabled='true'" if disabled %> class="span2" placeholder="name" id="badge_name" name="badge_name" value="<%= CGI.escapeHTML(settings['badge_name'] || "") %>"/>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="badge_url">Badge icon: </label>
+        <div class="controls">
+          <input type="text" <%= "disabled='true'" if disabled %> class="span2" placeholder="https://" id="badge_url" name="badge_url" value="<%= CGI.escapeHTML(settings['badge_url'] || "") %>"/>
+          should be 90x90 pixels<br/>
+          <a href="https://www.openbadges.me/designer.html?origin=<%= CGI.escape("#{BadgeHelper.protocol}://#{request.host_with_port}") %>&email=support@instructure.com" data-fancybox-type="iframe" id="badge_designer">use the badge designer</a>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="badge_description">Badge description: </label>
+        <div class="controls">
+          <textarea <%= "disabled='true'" if disabled %> class='input-xlarge' rows='3' name='badge_description' id='badge_description'><%= CGI.escapeHTML(settings['badge_description'] || "") %></textarea>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="badge_requirements">Explanation of requirements: </label>
+        <div class="controls">
+          <textarea <%= "disabled='true'" if disabled %> class='input-xlarge' rows='3' name='badge_requirements' id='badge_requirements'><%= CGI.escapeHTML(settings['badge_requirements'] || "") %></textarea>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="hours">Approx. hours for completion: </label>
+        <div class="controls">
+          <input type="text" <%= "disabled='true'" if disabled %> class="span1" placeholder="###" id="hours" name="hours" value="<%= settings['hours'] %>"/>
+          not enforced, strictly for reference :-)
+        </div>
+      </div>
+      <div class="control-group advanced" style="display: none;">
+        <!-- TODO: This won't work if the badges specify module completions... need to figure out a solution there -->
+        <label class="control-label" for="reference_code">Badge reference code: </label>
+        <div class="controls">
+          <input type="text" placeholder="set to assign" class="span5" id="reference_code" name="reference_code" value="<%= CGI.escapeHTML(ref_code || "") %>"/>
+          <br/>
+          Set this value to reuse an existing badge. Clear to unlink from an existing badge. Remember: linking and unlinking will cause problems if any users have already exported badges.
+          <% if @badge_config %>
+            To use this badge's settings for a different course, the code is <%= @badge_config.reference_code %>. 
+          <% end %>
+        </div>
+      </div>
+      <div class="control-group advanced">
+        <label class="control-label">Evidence: </label>
+        <div class="controls">
+          <div class="input-append">
+            <label>
+              <input id="require_evidence" type="checkbox" <%= 'checked' if settings['require_evidence'] %> name="require_evidence" value="1"/>
+              Require a URL as evidence before awarding
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="control-group advanced">
+        <label class="control-label">Manual approval: </label>
+        <div class="controls">
+          <div class="input-append">
+            <label>
+              <input id="manual_approval" type="checkbox" <%= 'checked' if settings['manual_approval'] %> name="manual_approval" value="1"/>
+              Require manual approval before awarding
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="control-group advanced">
+        <label class="control-label">Credits: </label>
+        <div class="controls">
+          <div class="input-append">
+            <label>
+              <input type="checkbox" <%= 'checked' if settings['credit_based'] %> id="credit_based" name="credit_based" value="1"/>
+              Use variable credits to allow multiple completion paths
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="min_percent">Final grade cutoff: </label>
+        <div class="controls">
+          <div class="input-append">
+            <input <%= "disabled='true'" if disabled %> type="text" class="span1" placeholder="##" id="min_percent" name="min_percent" value="<%= settings['min_percent'] %>"/><span class='add-on'> % </span>
+            <input name="credits_for_final_score" class="credits span1" title="Credits for Final Grade" placeholder="credits" value="<%= settings['credits_for_final_score'] %>"/>
+          </div>
+        </div>
+      </div>
+      <div id="modules_settings" rel="/badges/modules/<%= @badge_placement_config_id %>/<%= params['user_id'] %>">
+        <div class="control-group advanced">
+          <label class="control-label">Modules requiring completion:</label>
+          <div class="controls">
+            Checking for course modules...
+          </div>
+        </div>
+      </div>
+      <div id="outcomes_settings" rel="/badges/outcomes/<%= @badge_placement_config_id %>/<%= params['user_id'] %>">
+        <div class="control-group advanced">
+          <label class="control-label">Outcomes requiring completion:</label>
+          <div class="controls">
+            Checking for course outcomes...
+          </div>
+        </div>
+      </div>
+      <div class="control-group credits">
+        <label class="control-label" for="required_credits">Credits needed for completion: </label>
+        <div class="controls">
+          <input type="text" <%= "disabled='true'" if disabled %> class="span1" placeholder="###" id="required_credits" name="required_credits" value="<%= settings['required_credits'] %>"/>
+          out of <span class='total_credits'><%= settings['total_credits'] %></span>
+        </div>
+      </div>
+      <div class="control-group verification">
+        <% org = @badge_placement_config.organization %>
+        <% settings = (org && org.settings) || BadgeHelper.issuer %>
+        <p class="verification">
+          <img src='<%= settings['image'] %>'/>
+          This badge is issued by 
+          <a href="<%= settings['url'] %>">
+          <%= settings['name'] %></a>.
+          It is hosted at 
+          <%= (org && org.host) || request.host %>.
+          If this association
+          is incorrect, please <a href="<%= BadgeHelper.issuer['owner_url'] %>">contact the
+          administrator of this site</a>.
+          <span style="clear: left;"></span>
+        </p>
+      </div>
+      <div class="control-group advanced">
+        <label class="control-label">Public: </label>
+        <div class="controls">
+          <div class="input-append">
+            <label>
+              <input id="public" type="checkbox" <%= 'checked' if @badge_placement_config.badge_config.public %> name="public" value="1"/>
+              List this badge in the organization's public badge directory
+            </label>
+          </div>
+          <% if @badge_placement_config.badge_config.public %>
+            <% bc = @badge_placement_config.badge_config %>
+            <% badge_url = "#{BadgeHelper.protocol}://" + bc.organization.host + 
+                           "/badges/criteria/#{bc.id}/#{bc.nonce}" 
+            %>
+            <div>
+              <a href="<%= badge_url %>" target="_blank">public link to badge details page</a>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="form-actions" style="border: 0; background: transparent;">
+        <button type="submit" class='btn btn-primary' disabled="true">Save Badge Settings</button>
+        <button type="button" class='btn' id="disable_badge" rel="/badges/disable/<%= @badge_placement_config.id %>">Disable This Badge Location</button>
+      </div>
+    </fieldset>
+  </form> 

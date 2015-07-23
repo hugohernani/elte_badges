@@ -1,0 +1,62 @@
+<h2><a href="/"><img src="<%= @org.settings['image'] || "/organizations/default.png" %>" alt="Root"/></a> <%= @org.settings['name'] %> Badging Stats</h2>
+<div class='row'>
+  <div class='span8 offset2'>
+    <table class='table table-bordered table-striped'>
+      <tr>
+        <td>Authorized Badge Issuers</td>
+        <td><%= comma @stats['issuers'] %></td>
+      </tr>
+      <tr>
+        <td>Badges Configured <a class="sub" href="<%= request.env['badges.path_prefix'] %>/badges/public<%= "?this_org_only=1" if @stats_org %>">see earnable public badges</a></td>
+        <td><%= comma @stats['badge_configs'] %></td>
+      </tr>
+      <tr>
+        <td>Badge Placements</td>
+        <td><%= comma @stats['badge_placement_configs'] %></td>
+      </tr>
+      <tr>
+        <td>Badges Awarded <a class="sub" href="<%= request.env['badges.path_prefix'] %>/badges/public/awarded<%= "?this_org_only=1" if @stats_org %>">see learner-shared badges</a></td>
+        <td><%= comma @stats['badges'] %></td>
+      </tr>
+      <tr>
+        <td>Last Badge Awarded</td>
+        <td>
+          <% if @stats['last_badge_at'] %>
+            <%= Time.parse(@stats['last_badge_at']).strftime("%d %b, %Y") %>
+          <% else %>
+            Unknown <!-- TODO: change this to "Never" after a while, say mid-2015... -->
+          <% end %>
+        </td>
+      </tr>
+      <% unless @stats_org %>
+        <tr>
+          <td>Canvas Domains</td>
+          <td><%= comma @stats['domains'] %></td>
+        </tr>
+        <tr>
+          <td>
+            Organizations
+            <ul style="padding-top: 10px; list-style: none;">
+              <% orgs = Organization.all %>
+              <% orgs = orgs.select(&:approved?) unless params['all'] %>
+              <% orgs.each do |org| %>
+                <li style="margin: 5px;">
+                  <a href="<%= org.settings['url'] %>">
+                    <img src="<%= org.settings['image'] || "/organizations/default.png" %>" alt="" style="height: 40px; padding-right: 10px;"/>
+                    <%= org.settings['name'] %></a> 
+                  <a class="sub" href="<%= BadgeHelper.protocol %>://<%= org.host %>">badge site</a>
+                  <a class="sub" href="<%= BadgeHelper.protocol %>://<%= org.host %>/stats?this_org_only=1">stats</a>
+                </li>
+              <% end %>
+              <li style="margin-top: 15px; font-size: 12px; list-style: none;">
+                <a href="<%= BadgeHelper.issuer['owner_url'] %>">Contact us</a> to add your own badging site
+              </li>
+            </ul>
+            
+          </td>
+          <td><%= @stats['organizations'] %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,75 @@
+<% settings = @badge_config.settings || {} %>
+<img src='<%= settings['badge_url'] %>' style='float: left; margin-right: 20px;' class='thumbnail'/>
+<h2><%= settings['badge_name'] || "Unnamed Badge" %></h2>
+<p class='desc'><%= settings['badge_description'] %></p>
+
+<% if @current_badge %>
+  <div style="clear: left;" id="user"></div>
+  <% if @user_config && @user_config.image %>
+    <img src="<%= @user_config.image %>" class="avatar"/>
+    <h2><a href="<%= @user_config.profile_url %>"><%= @current_badge.user_name %></a></h2>
+  <% else %>
+    <h2><%= @current_badge.user_name %></h2>
+  <% end %>
+  <% if @earned %>
+    <p class="desc"><img src='/check.gif'/> This user completed the requirements needed for this badge<% if @current_badge.issued %>, and it was awarded <%= @current_badge.issued.strftime("%d %b, %Y") %><% end %>.</p>
+  <% else %>
+    <p class="desc"><img src='/redx.gif'/> This user has not completed the requirements necessary to receive this badge.</p>
+  <% end %>
+  <div style="clear: left;"></div>
+<% end %>
+
+<% if settings['badge_requirements'] && settings['badge_requirements'] != '' %>
+  <h3>Requirements for completion:</h3>
+  <p class='desc'>
+    <%= settings['badge_requirements'] %>
+  </p>
+<% end %>
+<% if settings['hours'] %>
+  <h3>Approximate hours for completion: <%= settings['hours'] %></h3>
+<% end %>
+<% org = @badge_config.organization %>
+<% settings = (org && org.settings) || BadgeHelper.issuer %>
+<p class="verification">
+  <img src='<%= settings['image'] %>'/>
+  This badge <%= @current_badge && @current_badge.awarded? ? "was" : "is" %> issued by <a href="<%= settings['url'] %>">
+  <%= settings['name'] %></a>. It is hosted at 
+  <%= (org && org.host) || request.host %>.
+  <span style="clear: left;"></span>
+</p>
+
+<% if @stats && @stats['start'] && @stats['end'] %>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    var stats = <%= @stats.to_json %>;
+    function drawChart() {
+      var table = [['Week', 'Recipients']];
+      var first = stats['start'];
+      var last = stats['end'];
+      
+      for(var idx = first; idx <= last;) {
+        var year = Math.floor(idx / 100).toString();
+        var week = (idx % 100).toString();
+        table.push([week + "-" + year, (stats[idx] || 0)]);
+        idx = idx + 1;
+        if(idx % 100 > 52) {
+          idx = idx - (idx % 100) + 100;
+        }
+      }
+      var data = google.visualization.arrayToDataTable(table);
+      var options = {
+        title: 'Badge Recipients Over Time',
+        hAxis: {title: 'Week-Year',  titleTextStyle: {color: '#333'}},
+        vAxis: {minValue: 0}
+      };
+
+      var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+  </script>
+  <div id="chart_div" style="width: 900px; height: 300px;"></div>
+<% end %>
+
+<div style='clear: left; padding-bottom: 10px;'></div>
